@@ -259,7 +259,7 @@ private DefaultTableModel model = new DefaultTableModel();
     private void cmbTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTypeActionPerformed
         JComboBox cb = (JComboBox) evt.getSource();
         String type = (String)cb.getSelectedItem();
-        System.out.println(type);
+        //System.out.println(type);
         
         if("alexa".equals(type)){
             model = new DefaultTableModel();

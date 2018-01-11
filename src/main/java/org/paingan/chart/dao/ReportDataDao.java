@@ -125,57 +125,6 @@ public class ReportDataDao {
         
         return alexaList;
     }
-        
-//    public static void main(String[] args) {
-//        System.out.println("testsing");
-//        ReportDataDao datacrud = new ReportDataDao();
-//        datacrud.openConnection();
-//       // datacrud.getAllData();
-//        datacrud.closeConnection();
-//        
-//    }
-        
-//            private void editData() {
-//        if (status.equals("add")) {
-//            txtId.setText("");
-//            txtNama.setText("");
-//            txtAlamat.setText("");
-//            txtTelp.setText("");
-//            txtEmail.setText("");
-//        }
-//        txtId.setEditable(true);
-//        txtNama.setEditable(true);
-//        txtAlamat.setEditable(true);
-//        txtEmail.setEditable(true);
-//        btSimpan.setEnabled(true);
-//        btBatal.setEnabled(true);
-//        btTambah.setEnabled(false);
-//        btUbah.setEnabled(false);
-//        btHapus.setEnabled(false);
-//        btKeluar.setEnabled(false);
-//        txtNama.requestFocus();
-//    }
-//
-//    private void readData() {
-//        txtId.setEditable(false);
-//        txtNama.setEditable(false);
-//        txtAlamat.setEditable(false);
-//        txtEmail.setEditable(false);
-//        btSimpan.setEnabled(false);
-//        btBatal.setEnabled(false);
-//        btTambah.setEnabled(true);
-//        btUbah.setEnabled(true);
-//        btHapus.setEnabled(true);
-//        btKeluar.setEnabled(true);
-//    }
-//    
-//        public BukuAlamat() {
-//        initComponents();
-//        openConnection();
-//        kolomTabel();
-//        getAllData();
-//        closeConnection();
-//    }
 
     /**
      * @return the conn

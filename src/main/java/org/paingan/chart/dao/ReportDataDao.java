@@ -5,9 +5,10 @@
  */
 package org.paingan.chart.dao;
 
-import org.paingan.chart.domain.Alexa;
+import org.paingan.chart.domain.ReportData;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -20,43 +21,59 @@ import java.util.logging.Logger;
  *
  * @author paulusyansen
  */
-public class AlexaDao {
-    private final static Logger logger = Logger.getLogger(AlexaDao.class.getName());
+public class ReportDataDao {
+    private final static Logger logger = Logger.getLogger(ReportDataDao.class.getName());
     
     private Connection conn;
     private String status;
 
-    public AlexaDao() {
+    public ReportDataDao() {
         
     }
 
     public void openConnection() {
         try {
             Class.forName("org.sqlite.JDBC");
-            setConn(DriverManager.getConnection("jdbc:sqlite:alexa-data.db"));
+            setConn(DriverManager.getConnection("jdbc:sqlite:data.db"));
         } catch (ClassNotFoundException | SQLException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
     }
     
     public void closeConnection() {
-        try {
+        try {       
             getConn().close();
         } catch (SQLException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
     }
     
-    public void insertAlexa(Alexa alexa) {
+    public void insertAlexa(ReportData reportData) throws SQLException {
+        String query = "insert into alexa(date, site, score) values(?,?,?)";
         
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.setString(1, reportData.getDate());
+        ps.setString(2, reportData.getSite());
+        ps.setFloat(3, reportData.getScore());
+        ps.execute();
     }
     
-    public void deleteAlexa(Alexa alexa) {
+    public void insert4G(ReportData reportData) throws SQLException {
+        String query = "insert into mobiledata(date, site, score) values(?,?,?)";
+        
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.setString(1, reportData.getDate());
+        ps.setString(2, reportData.getSite());
+        ps.setFloat(3, reportData.getScore());
+        ps.execute();
+    }
+    
+    public void deleteAlexa(ReportData alexa) {
         
     }
         
-    public List<Alexa> getAlexaList() {
-        List<Alexa> alexaList = new ArrayList();
+    public List<ReportData> getAlexaList() {
+        List<ReportData> alexaList = new ArrayList();
         
         try {
             Statement stat = getConn().createStatement();
@@ -64,7 +81,34 @@ public class AlexaDao {
             
             
             while (rs.next()) {
-                Alexa alexa = new Alexa();
+                ReportData alexa = new ReportData();
+                
+                alexa.setId(rs.getInt("id"));
+                alexa.setDate(rs.getString("date"));
+                alexa.setSite(rs.getString("site"));
+                alexa.setScore(rs.getFloat("score"));
+                alexa.setShowYN(rs.getString("showYN"));
+                
+                alexaList.add(alexa);
+            }
+            rs.close();
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }
+        
+        return alexaList;
+    }
+    
+    public List<ReportData> get4GList() {
+        List<ReportData> alexaList = new ArrayList();
+        
+        try {
+            Statement stat = getConn().createStatement();
+            ResultSet rs = stat.executeQuery("select * from mobiledata;");
+            
+            
+            while (rs.next()) {
+                ReportData alexa = new ReportData();
                 
                 alexa.setId(rs.getInt("id"));
                 alexa.setDate(rs.getString("date"));
@@ -84,7 +128,7 @@ public class AlexaDao {
         
 //    public static void main(String[] args) {
 //        System.out.println("testsing");
-//        AlexaDao datacrud = new AlexaDao();
+//        ReportDataDao datacrud = new ReportDataDao();
 //        datacrud.openConnection();
 //       // datacrud.getAllData();
 //        datacrud.closeConnection();

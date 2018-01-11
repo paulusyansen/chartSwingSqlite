@@ -9,7 +9,7 @@ package org.paingan.chart.domain;
  *
  * @author paulusyansen
  */
-public class Alexa {
+public class ReportData {
     private int id;
     private String date;
     private String site;

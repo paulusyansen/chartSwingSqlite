@@ -5,11 +5,18 @@
  */
 package org.paingan.chart;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.AbstractButton;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import org.paingan.chart.domain.Alexa;
-import org.paingan.chart.dao.AlexaDao;
+import org.paingan.chart.domain.ReportData;
+import org.paingan.chart.dao.ReportDataDao;
 
 /**
  *
@@ -34,8 +41,8 @@ private DefaultTableModel model = new DefaultTableModel();
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        site = new javax.swing.ButtonGroup();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        bgSite = new javax.swing.ButtonGroup();
+        jsp = new javax.swing.JScrollPane();
         tblData = new javax.swing.JTable();
         txtDate = new javax.swing.JTextField();
         txtScore = new javax.swing.JTextField();
@@ -51,6 +58,7 @@ private DefaultTableModel model = new DefaultTableModel();
         cmbType = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Weekly Site Speed Report");
         setResizable(false);
 
         tblData.setModel(new javax.swing.table.DefaultTableModel(
@@ -61,16 +69,16 @@ private DefaultTableModel model = new DefaultTableModel();
 
             }
         ));
-        jScrollPane1.setViewportView(tblData);
+        jsp.setViewportView(tblData);
 
-        site.add(rb1);
+        bgSite.add(rb1);
         rb1.setSelected(true);
         rb1.setText("elevenia");
 
-        site.add(rb2);
+        bgSite.add(rb2);
         rb2.setText("lazada");
 
-        site.add(rb3);
+        bgSite.add(rb3);
         rb3.setText("tokopedia");
 
         lblSite.setText("Site");
@@ -80,6 +88,7 @@ private DefaultTableModel model = new DefaultTableModel();
         lblScore.setText("Score");
 
         btnReport.setText("Report");
+        btnReport.setEnabled(false);
         btnReport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnReportActionPerformed(evt);
@@ -87,6 +96,7 @@ private DefaultTableModel model = new DefaultTableModel();
         });
 
         btnSave.setText("Add");
+        btnSave.setEnabled(false);
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSaveActionPerformed(evt);
@@ -109,7 +119,7 @@ private DefaultTableModel model = new DefaultTableModel();
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 786, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jsp, javax.swing.GroupLayout.PREFERRED_SIZE, 786, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -164,7 +174,7 @@ private DefaultTableModel model = new DefaultTableModel();
                     .addComponent(btnReport)
                     .addComponent(btnSave))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
+                .addComponent(jsp, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -172,23 +182,76 @@ private DefaultTableModel model = new DefaultTableModel();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportActionPerformed
-        ChartReportFrame mainFrame = new ChartReportFrame();
-        mainFrame.setVisible(true);
+        String type = (String) cmbType.getSelectedItem();
+        
+        if("4G".equals(type)){
+            ChartReportFrame mainFrame = new ChartReportFrame("4G");
+            mainFrame.setVisible(true);
+        } else {
+            ChartReportFrame mainFrame = new ChartReportFrame("alexa");
+            mainFrame.setVisible(true);
+        }
     }//GEN-LAST:event_btnReportActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        
+        if("".equals(txtDate.getText()) && "".equals(txtScore.getText())) {
+            JOptionPane.showMessageDialog(null, "Date or Score is Empty!");
+            return;
+        }
+        
         model = new DefaultTableModel();
         tblData.setModel(model);
             
-        AlexaDao dataCrud = new AlexaDao();
+        ReportDataDao dataCrud = new ReportDataDao();
         dataCrud.openConnection();
-        List<Alexa> alexaList = dataCrud.getAlexaList();
+        
+        String type = (String) cmbType.getSelectedItem();
+        
+        List<ReportData> reportList = new ArrayList();
+        
+        ReportData reportData = new ReportData();
+        
+        String site = "";
+        
+        for (Enumeration<AbstractButton> buttons = bgSite.getElements(); buttons.hasMoreElements();) {
+            AbstractButton button = buttons.nextElement();
+
+            if (button.isSelected()) {
+                site = button.getText();
+            }
+        }
+         
+        reportData.setDate(txtDate.getText());
+        reportData.setScore(Float.parseFloat(txtScore.getText()));
+        reportData.setSite(site);
+        
+        
+        if("alexa".equals(type)){
+            try {
+                reportList = dataCrud.getAlexaList();
+                dataCrud.insertAlexa(reportData);
+            } catch (SQLException ex) {
+                Logger.getLogger(ChartMainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else if("4G".equals(type)){
+            try {
+                reportList = dataCrud.get4GList();
+                dataCrud.insertAlexa(reportData);
+            } catch (SQLException ex) {
+                Logger.getLogger(ChartMainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         
         //TODO add save action
         
-        for (Alexa alexa : alexaList) {
-            model.addRow(new Object[]{ alexa.getDate(), alexa.getSite(), alexa.getScore() });
+        
+
+        for (ReportData data : reportList) {
+            model.addRow(new Object[]{ data.getDate(), data.getSite(), data.getScore() });
         }
+        
         
         dataCrud.closeConnection();
     }//GEN-LAST:event_btnSaveActionPerformed
@@ -207,22 +270,46 @@ private DefaultTableModel model = new DefaultTableModel();
             model.addColumn("Score");
             tblData.setModel(model);
 
-            AlexaDao dataCrud = new AlexaDao();
+            ReportDataDao dataCrud = new ReportDataDao();
             dataCrud.openConnection();
-            List<Alexa> alexaList = dataCrud.getAlexaList();
+            List<ReportData> alexaList = dataCrud.getAlexaList();
 
-            for (Alexa alexa : alexaList) {
-                model.addRow(new Object[]{ alexa.getDate(), alexa.getSite(), alexa.getScore() });
+            for (ReportData reportData : alexaList) {
+                model.addRow(new Object[]{ reportData.getDate(), reportData.getSite(), reportData.getScore() });
             }
 
             dataCrud.closeConnection();
+            
+            btnSave.setEnabled(true);
+            btnReport.setEnabled(true);
         }
         else if("4G".equals(type)){
             model = new DefaultTableModel();
             tblData.setModel(model);
+            
+            model.addColumn("Date");
+            model.addColumn("Site");
+            model.addColumn("Score");
+            tblData.setModel(model);
+
+            ReportDataDao dataCrud = new ReportDataDao();
+            dataCrud.openConnection();
+            List<ReportData> reportList = dataCrud.get4GList();
+
+            for (ReportData reportData : reportList) {
+                model.addRow(new Object[]{ reportData.getDate(), reportData.getSite(), reportData.getScore() });
+            }
+
+            dataCrud.closeConnection();
+            
+            btnSave.setEnabled(true);
+            btnReport.setEnabled(true);
         } else {
             model = new DefaultTableModel();
             tblData.setModel(model);
+            
+            btnSave.setEnabled(false);
+            btnReport.setEnabled(false);
         }
     }//GEN-LAST:event_cmbTypeActionPerformed
 
@@ -263,10 +350,11 @@ private DefaultTableModel model = new DefaultTableModel();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup bgSite;
     private javax.swing.JButton btnReport;
     private javax.swing.JButton btnSave;
     private javax.swing.JComboBox<String> cmbType;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jsp;
     private javax.swing.JLabel lblDate;
     private javax.swing.JLabel lblScore;
     private javax.swing.JLabel lblSite;
@@ -274,7 +362,6 @@ private DefaultTableModel model = new DefaultTableModel();
     private javax.swing.JRadioButton rb1;
     private javax.swing.JRadioButton rb2;
     private javax.swing.JRadioButton rb3;
-    private javax.swing.ButtonGroup site;
     private javax.swing.JTable tblData;
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtScore;

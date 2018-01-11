@@ -8,10 +8,12 @@ package org.paingan.chart;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,28 +23,20 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.NumberTickUnit;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.StandardCategoryToolTipGenerator;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.RangeType;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.RectangleInsets;
-import org.paingan.chart.domain.Alexa;
-import org.paingan.chart.dao.AlexaDao;
+import org.paingan.chart.domain.ReportData;
+import org.paingan.chart.dao.ReportDataDao;
 
 /**
  *
  * @author paulusyansen
  */
 public class ChartReportFrame extends javax.swing.JFrame {
+    
+    private String reportType;
 
     /**
      * Creates new form ChartMainFrame
@@ -50,20 +44,18 @@ public class ChartReportFrame extends javax.swing.JFrame {
     public ChartReportFrame() {
         DefaultCategoryDataset alexaSeries = new DefaultCategoryDataset();
          
-        AlexaDao dataCrud = new AlexaDao();
+        ReportDataDao dataCrud = new ReportDataDao();
         dataCrud.openConnection();
-        List<Alexa> alexaList = dataCrud.getAlexaList();
+        List<ReportData> alexaList = dataCrud.getAlexaList();
         dataCrud.closeConnection();
          
-        for (Alexa alexa : alexaList) {
+        for (ReportData alexa : alexaList) {
             alexaSeries.addValue(alexa.getScore(),alexa.getSite(),alexa.getDate());
         }
          
-        //XYDataset xyDataset = xySeriesCollection;
         JFreeChart chart = ChartFactory.createLineChart(
             "Site Speed (Alexa)",  "", "Average Load Time",
             alexaSeries, PlotOrientation.VERTICAL, true, true, false);
-        
         
         CategoryPlot plot = chart.getCategoryPlot();
         plot.getRenderer().setSeriesPaint(0, Color.ORANGE);
@@ -72,11 +64,8 @@ public class ChartReportFrame extends javax.swing.JFrame {
         plot.getRenderer().setSeriesStroke(1, new BasicStroke( 3 ));
         plot.getRenderer().setSeriesPaint(2, Color.GREEN);
         plot.getRenderer().setSeriesStroke(2, new BasicStroke( 3 ));
-//        plot.getRenderer().setBaseToolTipGenerator(new StandardCategoryToolTipGenerator(
-//    "Series {0}, Category {1}, Value {2}", NumberFormat.getInstance()));
         
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-//        rangeAxis.setRange(1.5, 3.5);
         rangeAxis.setInverted(true);
         rangeAxis.setAutoRange(false);
         rangeAxis.setRangeWithMargins(1.4,3.4);
@@ -84,10 +73,6 @@ public class ChartReportFrame extends javax.swing.JFrame {
         
         NumberFormat formatter = new DecimalFormat("#0.00");     
         rangeAxis.setNumberFormatOverride(formatter);
-//        rangeAxis.setAxisLinePaint(Color.RED);
-//        plot.getRangeAxis();
-//NumberAxis rangeAxis = (NumberAxis)p lot.getRangeAxis();
-//rangeAxis.setAxisRange(0.0, 100.0);
       
         Color mycolor = new Color(240,240,240); 
         plot.setBackgroundPaint(mycolor);
@@ -95,7 +80,7 @@ public class ChartReportFrame extends javax.swing.JFrame {
         /* generate chart image */
         int width = 1024;    /* Width of the image */
         int height = 600;   /* Height of the image */ 
-        File lineChart = new File( "LineChart.jpeg" ); 
+        File lineChart = new File( "AlexaChart.jpeg" ); 
         
         try {
             ChartUtilities.saveChartAsJPEG(lineChart ,chart, width ,height);
@@ -116,6 +101,92 @@ public class ChartReportFrame extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
     }
 
+    public ChartReportFrame(String reportType) throws HeadlessException {
+        this.reportType = reportType;
+        
+        DefaultCategoryDataset alexaSeries = new DefaultCategoryDataset();
+         
+        ReportDataDao dataCrud = new ReportDataDao();
+        dataCrud.openConnection();
+        
+        
+        List<ReportData> dataList = new ArrayList();
+        
+        if("4G".equals(reportType)) {
+            dataList = dataCrud.get4GList();
+        } else {
+            dataList = dataCrud.getAlexaList();
+        }
+        
+        dataCrud.closeConnection();
+         
+        for (ReportData reportData : dataList) {
+            alexaSeries.addValue(reportData.getScore(),reportData.getSite(),reportData.getDate());
+        }
+         
+        JFreeChart chart = ChartFactory.createLineChart(
+            "Site Speed ("+reportType+")",  "", "Average Load Time",
+            alexaSeries, PlotOrientation.VERTICAL, true, true, false);
+        
+        CategoryPlot plot = chart.getCategoryPlot();
+        plot.getRenderer().setSeriesPaint(0, Color.ORANGE);
+        plot.getRenderer().setSeriesStroke(0, new BasicStroke( 3 ));
+        plot.getRenderer().setSeriesPaint(1, Color.BLUE);
+        plot.getRenderer().setSeriesStroke(1, new BasicStroke( 3 ));
+        plot.getRenderer().setSeriesPaint(2, Color.GREEN);
+        plot.getRenderer().setSeriesStroke(2, new BasicStroke( 3 ));
+        
+        plot.getRenderer().setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
+        
+        NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+        rangeAxis.setInverted(true);
+        rangeAxis.setAutoRange(false);
+        
+        if("4G".equals(reportType)) {
+            rangeAxis.setRangeWithMargins(0.9,5.7);
+            rangeAxis.setTickUnit(new NumberTickUnit(0.5));
+        } else {
+            rangeAxis.setRangeWithMargins(1.4,3.4);
+            rangeAxis.setTickUnit(new NumberTickUnit(0.1));
+        }
+        
+        
+        NumberFormat formatter = new DecimalFormat("#0.00");     
+        rangeAxis.setNumberFormatOverride(formatter);
+      
+        Color mycolor = new Color(240,240,240); 
+        plot.setBackgroundPaint(mycolor);
+        
+        /* generate chart image */
+        int width = 1024;    /* Width of the image */
+        int height = 600;   /* Height of the image */ 
+        File lineChart = new File( reportType+"Chart.jpeg" ); 
+        
+        try {
+            ChartUtilities.saveChartAsJPEG(lineChart ,chart, width ,height);
+        } catch (IOException ex) {
+            Logger.getLogger(ChartReportFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+//        ChartPanel cp = new ChartPanel(chart) {
+//            @Override
+//            public Dimension getPreferredSize() {
+//                return new Dimension(width, height);
+//            }
+//        };
+
+        ChartPanel cp = new ChartPanel(chart);
+    
+        add(cp);
+        
+        cp.setMouseWheelEnabled(false);
+
+        initComponents();
+        this.setLocationRelativeTo(null);
+    }
+    
+    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -125,10 +196,9 @@ public class ChartReportFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Chart Sample using JFreeChart");
         setName("frmMain"); // NOI18N
-        getContentPane().setLayout(new java.awt.GridLayout());
+        getContentPane().setLayout(new java.awt.GridLayout(1, 0));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents

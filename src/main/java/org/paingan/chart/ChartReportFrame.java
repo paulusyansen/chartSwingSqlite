@@ -78,8 +78,8 @@ public class ChartReportFrame extends javax.swing.JFrame {
         plot.setBackgroundPaint(mycolor);
         
         /* generate chart image */
-        int width = 1024;    /* Width of the image */
-        int height = 600;   /* Height of the image */ 
+        int width = 1280;    /* Width of the image */
+        int height = 720;   /* Height of the image */ 
         File lineChart = new File( "AlexaChart.jpeg" ); 
         
         try {
@@ -91,7 +91,7 @@ public class ChartReportFrame extends javax.swing.JFrame {
         ChartPanel cp = new ChartPanel(chart) {
             @Override
             public Dimension getPreferredSize() {
-                return new Dimension(1024, 600);
+                return new Dimension(1280, 720);
             }
         };
     
@@ -158,8 +158,8 @@ public class ChartReportFrame extends javax.swing.JFrame {
         plot.setBackgroundPaint(mycolor);
         
         /* generate chart image */
-        int width = 1024;    /* Width of the image */
-        int height = 600;   /* Height of the image */ 
+        int width = 1280;    /* Width of the image */
+        int height = 720;   /* Height of the image */ 
         File lineChart = new File( reportType+"Chart.jpeg" ); 
         
         try {
@@ -167,13 +167,6 @@ public class ChartReportFrame extends javax.swing.JFrame {
         } catch (IOException ex) {
             Logger.getLogger(ChartReportFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-//        ChartPanel cp = new ChartPanel(chart) {
-//            @Override
-//            public Dimension getPreferredSize() {
-//                return new Dimension(width, height);
-//            }
-//        };
 
         ChartPanel cp = new ChartPanel(chart);
     
@@ -197,7 +190,9 @@ public class ChartReportFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         setTitle("Chart Sample using JFreeChart");
+        setMinimumSize(new java.awt.Dimension(1240, 720));
         setName("frmMain"); // NOI18N
+        setSize(new java.awt.Dimension(1280, 720));
         getContentPane().setLayout(new java.awt.GridLayout(1, 0));
 
         pack();

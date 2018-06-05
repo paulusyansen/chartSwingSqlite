@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.paingan.chart;
+package org.paingan.chart.swing;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
